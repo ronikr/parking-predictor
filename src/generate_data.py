@@ -27,7 +27,7 @@ for j in range(total_day_to_generate):
             data.append(row)
 
 
-with open('data/test_data.csv', mode='w', newline='', encoding='utf-8') as file:
+with open('../data/apify/test_data.csv', mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(['icon', 'id', 'timestamp'])  # Optional header
     writer.writerows(data)

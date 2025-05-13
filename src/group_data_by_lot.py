@@ -1,8 +1,8 @@
 import csv
 from datetime import datetime, timedelta
 
-PARKING_DATA_FILE = "data/test_data.csv"
-STATIC_LOT_DATA = "data/dataset_parking-address-data.csv"
+PARKING_DATA_FILE = "../data/apify/test_data.csv"
+STATIC_LOT_DATA = "../data/apify/dataset_parking-address-data.csv"
 
 
 def load_static_data() -> dict:

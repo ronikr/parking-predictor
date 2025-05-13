@@ -1,12 +1,9 @@
 # tests.py
 import csv
-from pprint import pprint
-from group_data_by_lot import (PARKING_DATA_FILE,
-                               STATIC_LOT_DATA,
-                               load_static_data,
-                               load_dynamic_data,
-                               add_prediction_to_lots,
-                               calculate_availability_prediction)
+from src.group_data_by_lot import (load_static_data,
+                                   load_dynamic_data,
+                                   add_prediction_to_lots,
+                                   calculate_availability_prediction)
 
 
 def preview_csv(file_path, num_rows=3):

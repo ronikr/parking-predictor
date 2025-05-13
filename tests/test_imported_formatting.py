@@ -1,8 +1,8 @@
 import pandas as pd
 
 # Load original and filtered files
-raw = pd.read_csv("data/imported_converted_data.csv")
-filtered = pd.read_csv("data/imported_formatted.csv")
+raw = pd.read_csv("../data/imported/imported_converted_data.csv")
+filtered = pd.read_csv("../data/imported/imported_formatted.csv")
 
 # Print row counts
 print(f"📊 Raw rows: {len(raw)}")

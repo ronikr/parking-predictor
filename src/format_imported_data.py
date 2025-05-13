@@ -1,7 +1,7 @@
 import pandas as pd
 
-imported_file = "data/imported_converted_data.csv"
-static_file = "data/dataset_parking-address-data.csv"
+imported_file = "../data/imported/imported_converted_data.csv"
+static_file = "../data/apify/dataset_parking-address-data.csv"
 
 # Load data
 imported_df = pd.read_csv(imported_file)
