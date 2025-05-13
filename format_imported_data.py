@@ -1,0 +1,35 @@
+import pandas as pd
+
+imported_file = "data/imported_converted_data.csv"
+static_file = "data/dataset_parking-address-data.csv"
+
+# Load data
+imported_df = pd.read_csv(imported_file)
+static_df = pd.read_csv(static_file)
+
+# === Filter: keep only rows where minute == 10
+imported_df = imported_df[imported_df['minute'] == 10]
+
+# === Map status to icon ===
+status_to_icon = {
+    1.0: "male",
+    0.7: "meat",
+    0.0: "panui"
+}
+imported_df['icon'] = imported_df['status'].map(status_to_icon)
+
+# === Merge to get lot_id ===
+imported_df['lot'] = imported_df['lot'].str.strip()
+static_df['name'] = static_df['name'].str.strip()
+merged_df = pd.merge(imported_df, static_df[['name', 'lot_id']], how='left', left_on='lot', right_on='name')
+
+# === Convert timestamp ===
+merged_df['timestamp'] = pd.to_datetime(merged_df['time']).dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+# === Select and rename columns ===
+final_df = merged_df[['icon', 'lot_id', 'timestamp']].rename(columns={'lot_id': 'id'})
+
+# === Save output ===
+final_df.to_csv("data/imported_formatted.csv", index=False, encoding='utf-8-sig')
+
+print("✅ imported data converted and saved to imported_formatted.csv")
