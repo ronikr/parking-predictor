@@ -25,7 +25,11 @@ static_df['name'] = static_df['name'].str.strip()
 imported_with_id_df = pd.merge(imported_df, static_df[['name', 'lot_id']], how='left', left_on='lot', right_on='name')
 
 # === Convert timestamp ===
-imported_with_id_df['timestamp'] = imported_with_id_df['time'].replace("+02:00", "").replace(" ", "T") + "Z"
+imported_with_id_df['timestamp'] = (
+    pd.to_datetime(imported_with_id_df['time'], errors='coerce')
+    - pd.Timedelta(hours=2)
+).dt.strftime('%Y-%m-%dT%H:%M:%S.%f').str.slice(0, 23) + "Z"
+
 
 # === Select and rename columns ===
 final_df = imported_with_id_df[['icon', 'lot_id', 'timestamp']].rename(columns={'lot_id': 'id'})
@@ -34,3 +38,4 @@ final_df = imported_with_id_df[['icon', 'lot_id', 'timestamp']].rename(columns={
 final_df.to_csv("../data/imported/imported_formatted.csv", index=False, encoding='utf-8-sig')
 
 print("✅ imported data converted and saved to imported_formatted.csv")
+print(imported_with_id_df['timestamp'].head())

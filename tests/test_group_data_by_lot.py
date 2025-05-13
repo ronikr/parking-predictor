@@ -3,6 +3,7 @@ import csv
 from src.group_data_by_lot import (load_static_data,
                                    load_dynamic_data,
                                    add_prediction_to_lots,
+                                   convert_utc_to_israel_time,
                                    calculate_availability_prediction)
 
 
@@ -69,8 +70,8 @@ def test_add_prediction_to_lots():
     lots = add_prediction_to_lots(lots)
 
     # decide how many we wish to test
-    lot_limit = 2
-    day_limit = 2
+    lot_limit = 1
+    day_limit = 3
     hour_limit = 35
 
     for lot_index, (lot_id, lot_data) in enumerate(lots.items()):
@@ -89,13 +90,24 @@ def test_add_prediction_to_lots():
             break
 
 
+def test_convert_utc_to_israel_time():
+    print(convert_utc_to_israel_time("2025-01-17T07:00:00Z"))  # Winter (UTC+2)
+    print(convert_utc_to_israel_time("2025-05-06T07:00:00Z"))  # Summer (UTC+3)
+
+
 if __name__ == "__main__":
+
     # uncomment the functions to test
     # preview_csv(STATIC_LOT_DATA)
     # preview_csv(PARKING_DATA_FILE)
+    # preview_csv("../data/merged_parking_data.csv")
+
     # static_lot_dict_preview(static_lots)
     # test_calculate_availability_prediction()
+    # test_convert_utc_to_israel_time()
+
     static_lots = load_static_data()
     populated_lots = load_dynamic_data(static_lots)
-    preview_availability(populated_lots)
+    # preview_availability(populated_lots)
     test_add_prediction_to_lots()
+

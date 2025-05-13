@@ -1,7 +1,9 @@
+from dateutil import parser
+import pytz
 import csv
 from datetime import datetime, timedelta
 
-PARKING_DATA_FILE = "../data/apify/dataset_parking-hourly-data_2025-05-06_10-14-39-258.csv"
+PARKING_DATA_FILE = "../data/merged_parking_data.csv"
 STATIC_LOT_DATA = "../data/apify/dataset_parking-address-data.csv"
 
 
@@ -23,15 +25,10 @@ def load_static_data() -> dict:
     return lots
 
 
-static_lots = load_static_data()
-
-
 def convert_utc_to_israel_time(utc_timestamp: str) -> datetime:
-    """Converts an ISO UTC timestamp string to a datetime object in Israel time (UTC+3)."""
-    if utc_timestamp.endswith('Z'):
-        utc_timestamp = utc_timestamp[:-1]  # remove the 'Z'
-    utc_time = datetime.fromisoformat(utc_timestamp)
-    return utc_time + timedelta(hours=3)
+    dt_utc = parser.isoparse(utc_timestamp).replace(tzinfo=pytz.UTC)
+    dt_il = dt_utc.astimezone(pytz.timezone("Asia/Jerusalem"))
+    return dt_il  # ✅ return the datetime, not string
 
 
 def insert_availability(lots_by_id: dict, lot_id: str, israel_time: datetime, availability_status: str) -> None:
@@ -125,3 +122,8 @@ def add_prediction_to_lots(lots_by_id: dict) -> dict:
                 hour['prediction'] = lot_prediction
     return lots_by_id
 
+
+if __name__ == "__main__":
+    static_lots = load_static_data()
+    populated_lots = load_dynamic_data(static_lots)
+    add_prediction_to_lots(populated_lots)
