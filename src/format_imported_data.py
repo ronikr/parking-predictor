@@ -3,6 +3,7 @@ import pandas as pd
 imported_file = "../data/imported/imported_converted_data.csv"
 static_file = "../data/apify/dataset_parking-address-data.csv"
 
+
 # Load data
 imported_df = pd.read_csv(imported_file)
 static_df = pd.read_csv(static_file)
@@ -21,15 +22,15 @@ imported_df['icon'] = imported_df['status'].map(status_to_icon)
 # === Merge to get lot_id ===
 imported_df['lot'] = imported_df['lot'].str.strip()
 static_df['name'] = static_df['name'].str.strip()
-merged_df = pd.merge(imported_df, static_df[['name', 'lot_id']], how='left', left_on='lot', right_on='name')
+imported_with_id_df = pd.merge(imported_df, static_df[['name', 'lot_id']], how='left', left_on='lot', right_on='name')
 
 # === Convert timestamp ===
-merged_df['timestamp'] = pd.to_datetime(merged_df['time']).dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+imported_with_id_df['timestamp'] = imported_with_id_df['time'].replace("+02:00", "").replace(" ", "T") + "Z"
 
 # === Select and rename columns ===
-final_df = merged_df[['icon', 'lot_id', 'timestamp']].rename(columns={'lot_id': 'id'})
+final_df = imported_with_id_df[['icon', 'lot_id', 'timestamp']].rename(columns={'lot_id': 'id'})
 
 # === Save output ===
-final_df.to_csv("data/imported_formatted.csv", index=False, encoding='utf-8-sig')
+final_df.to_csv("../data/imported/imported_formatted.csv", index=False, encoding='utf-8-sig')
 
 print("✅ imported data converted and saved to imported_formatted.csv")

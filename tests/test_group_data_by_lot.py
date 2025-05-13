@@ -70,7 +70,7 @@ def test_add_prediction_to_lots():
 
     # decide how many we wish to test
     lot_limit = 2
-    day_limit = 1
+    day_limit = 2
     hour_limit = 35
 
     for lot_index, (lot_id, lot_data) in enumerate(lots.items()):
@@ -93,9 +93,9 @@ if __name__ == "__main__":
     # uncomment the functions to test
     # preview_csv(STATIC_LOT_DATA)
     # preview_csv(PARKING_DATA_FILE)
-    # static_lots = load_static_data()
     # static_lot_dict_preview(static_lots)
-    # populated_lots = load_dynamic_data(static_lots)
-    # preview_availability(populated_lots)
     # test_calculate_availability_prediction()
+    static_lots = load_static_data()
+    populated_lots = load_dynamic_data(static_lots)
+    preview_availability(populated_lots)
     test_add_prediction_to_lots()

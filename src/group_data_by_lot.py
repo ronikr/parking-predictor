@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime, timedelta
 
-PARKING_DATA_FILE = "../data/apify/test_data.csv"
+PARKING_DATA_FILE = "../data/apify/dataset_parking-hourly-data_2025-05-06_10-14-39-258.csv"
 STATIC_LOT_DATA = "../data/apify/dataset_parking-address-data.csv"
 
 
