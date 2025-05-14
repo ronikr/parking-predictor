@@ -123,7 +123,45 @@ def add_prediction_to_lots(lots_by_id: dict) -> dict:
     return lots_by_id
 
 
+import json
+import os
+
+def flatten_predictions(lots_by_id: dict) -> list[dict]:
+    flattened = []
+    for lot_id, lot_data in lots_by_id.items():
+        name = lot_data.get("name")
+        address = lot_data.get("address")
+        url = lot_data.get("url")
+        availability = lot_data.get("availability", {})
+
+        for weekday, hours in availability.items():
+            for hour, hour_data in hours.items():
+                flattened.append({
+                    "lot_id": lot_id,
+                    "weekday": weekday,
+                    "hour": hour,
+                    "raw": hour_data.get("raw", []),
+                    "prediction": hour_data.get("prediction", {}),
+                    "name": name,
+                    "address": address,
+                    "url": url,
+                    "location": {
+                        "type": "Point",
+                        "coordinates": [0.0, 0.0]  # Placeholder to be updated later
+                    }
+                })
+    return flattened
+
+
+def save_flattened_to_json(flat_data: list[dict], output_path="../data/output/hourly_predictions.json"):
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(flat_data, f, indent=2, ensure_ascii=False)
+
+
 if __name__ == "__main__":
     static_lots = load_static_data()
     populated_lots = load_dynamic_data(static_lots)
-    add_prediction_to_lots(populated_lots)
+    enriched_lots = add_prediction_to_lots(populated_lots)
+    flat = flatten_predictions(enriched_lots)
+    save_flattened_to_json(flat)

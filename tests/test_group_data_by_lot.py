@@ -75,7 +75,8 @@ def test_add_prediction_to_lots():
     hour_limit = 35
 
     for lot_index, (lot_id, lot_data) in enumerate(lots.items()):
-        print(f"Lot {lot_id} – {lot_data['name']}")
+        print(f"Lot {lot_id} – {lot_data['name']} - {lot_data['address']}")
+        print(lot_data['url'])
         availability = lot_data['availability']
         for day_index, (weekday, weekday_data) in enumerate(availability.items()):
             print(f"  {weekday}:")
@@ -108,6 +109,6 @@ if __name__ == "__main__":
 
     static_lots = load_static_data()
     populated_lots = load_dynamic_data(static_lots)
-    # preview_availability(populated_lots)
     test_add_prediction_to_lots()
+    # preview_availability(populated_lots)
 

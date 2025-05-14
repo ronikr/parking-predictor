@@ -36,8 +36,8 @@ def preview_csv_bottom_rows(file_path, num_rows=3):
 # preview_csv_top_rows("../data/apify/dataset_parking-hourly-data_2025-05-06_10-14-39-258.csv")
 # preview_csv_bottom_rows("../data/imported/imported_formatted.csv")
 # preview_csv_bottom_rows("../data/apify/dataset_parking-hourly-data_2025-05-06_10-14-39-258.csv")
-preview_csv_bottom_rows("../data/merged_parking_data.csv")
-preview_csv_top_rows("../data/merged_parking_data.csv")
+# preview_csv_bottom_rows("../data/merged_parking_data.csv")
+# preview_csv_top_rows("../data/merged_parking_data.csv")
 
 # # 1. Read the timestamp as a timezone-aware datetime
 # ts = pd.Timestamp("2025-05-09 17:00:13.760778+02:00")
