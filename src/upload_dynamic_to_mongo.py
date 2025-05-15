@@ -18,7 +18,12 @@ def upload_to_mongo(flattened_data, mongo_uri, db_name="parking_app", collection
 
 # Example usage
 if __name__ == "__main__":
-    with open("../data/output/hourly_predictions.json", "r", encoding="utf-8") as f:
+    file_path = "../data/output/hourly_predictions.json"
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"❌ File not found: {file_path}")
+
+    with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     mongo_uri = os.getenv("MONGO_URI")

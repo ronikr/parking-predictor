@@ -2,6 +2,8 @@ from dateutil import parser
 import pytz
 import csv
 from datetime import datetime, timedelta
+import json
+import os
 
 PARKING_DATA_FILE = "../data/merged_parking_data.csv"
 STATIC_LOT_DATA = "../data/apify/dataset_parking-address-data.csv"
@@ -20,7 +22,11 @@ def load_static_data() -> dict:
                 'address': row['address'],
                 'name': row['name'],
                 'url': row['url'],
-                'availability': {}  # previously 'records'
+                'location': {
+                    'type': 'Point',
+                    'coordinates': [0.0, 0.0]  # Placeholder
+                },
+                'availability': {}
             }
     return lots
 
@@ -28,14 +34,12 @@ def load_static_data() -> dict:
 def convert_utc_to_israel_time(utc_timestamp: str) -> datetime:
     dt_utc = parser.isoparse(utc_timestamp).replace(tzinfo=pytz.UTC)
     dt_il = dt_utc.astimezone(pytz.timezone("Asia/Jerusalem"))
-    return dt_il  # ✅ return the datetime, not string
+    return dt_il
 
 
 def insert_availability(lots_by_id: dict, lot_id: str, israel_time: datetime, availability_status: str) -> None:
-    """Adds an availability status to the correct time slot in a lot's availability data."""
     weekday = israel_time.strftime('%A').lower()
     hour = israel_time.hour
-
     lot_data = lots_by_id[lot_id]
     availability = lot_data['availability']
 
@@ -59,32 +63,26 @@ def map_icon_to_status(icon: str) -> str:
         'pail': 'unknown',
         '': 'no_data'
     }
-    if icon in mapping:
-        return mapping[icon]
-    else:
-        return 'no_data'
+    return mapping.get(icon, 'no_data')
 
 
-def load_dynamic_data(lots_by_id: dict) -> dict:
-    """Reads dynamic parking data from CSV and populates each lot's availability."""
+def load_dynamic_data(lot_dict: dict) -> None:
     with open(PARKING_DATA_FILE, encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
 
         for row in reader:
-            if not row.get('id'):  # skip rows without a lot_id (summary row, etc.)
+            if not row.get('id'):
                 continue
 
             lot_id = row['id']
             availability_status = map_icon_to_status(row['icon'])
             timestamp = row['timestamp']
 
-            if lot_id not in lots_by_id:
-                continue  # skip rows for lots not found in static data
+            if lot_id not in lot_dict:
+                continue
 
             israel_time = convert_utc_to_israel_time(timestamp)
-            insert_availability(lots_by_id, lot_id, israel_time, availability_status)
-
-    return lots_by_id
+            insert_availability(lot_dict, lot_id, israel_time, availability_status)
 
 
 def calculate_availability_prediction(availability_list: list) -> dict:
@@ -113,25 +111,22 @@ def calculate_availability_prediction(availability_list: list) -> dict:
     return availability_options
 
 
-def add_prediction_to_lots(lots_by_id: dict) -> dict:
-    for lot in lots_by_id.values():
+def add_prediction_to_lots(lot_dict: dict) -> None:
+    for lot in lot_dict.values():
         for day in lot['availability'].values():
             for hour in day.values():
                 raw_hourly_data = hour['raw']
                 lot_prediction = calculate_availability_prediction(raw_hourly_data)
                 hour['prediction'] = lot_prediction
-    return lots_by_id
 
 
-import json
-import os
-
-def flatten_predictions(lots_by_id: dict) -> list[dict]:
+def flatten_predictions(lot_dict: dict) -> list[dict]:
     flattened = []
-    for lot_id, lot_data in lots_by_id.items():
+    for lot_id, lot_data in lot_dict.items():
         name = lot_data.get("name")
         address = lot_data.get("address")
         url = lot_data.get("url")
+        location = lot_data.get("location")
         availability = lot_data.get("availability", {})
 
         for weekday, hours in availability.items():
@@ -145,23 +140,42 @@ def flatten_predictions(lots_by_id: dict) -> list[dict]:
                     "name": name,
                     "address": address,
                     "url": url,
-                    "location": {
-                        "type": "Point",
-                        "coordinates": [0.0, 0.0]  # Placeholder to be updated later
-                    }
+                    "location": location
                 })
     return flattened
 
 
-def save_flattened_to_json(flat_data: list[dict], output_path="../data/output/hourly_predictions.json"):
+def flatten_static_metadata(lots_by_id: dict) -> list[dict]:
+    return [
+        {
+            "lot_id": lot_id,
+            "name": lot["name"],
+            "address": lot["address"],
+            "url": lot["url"],
+            "location": lot.get("location", {"type": "Point", "coordinates": [0.0, 0.0]})
+        }
+        for lot_id, lot in lots_by_id.items()
+    ]
+
+
+def save_flattened_availabilities_to_json(flat_data: list[dict], output_path="../data/output/hourly_predictions.json"):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(flat_data, f, indent=2, ensure_ascii=False)
 
 
+def save_flattened_static_to_json(static_data: list[dict], output_path="../data/output/lots_static.json"):
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(static_data, f, indent=2, ensure_ascii=False)
+
+
 if __name__ == "__main__":
-    static_lots = load_static_data()
-    populated_lots = load_dynamic_data(static_lots)
-    enriched_lots = add_prediction_to_lots(populated_lots)
-    flat = flatten_predictions(enriched_lots)
-    save_flattened_to_json(flat)
+    lot_data = load_static_data()
+    flat_static = flatten_static_metadata(lot_data)
+    save_flattened_static_to_json(flat_static)
+
+    load_dynamic_data(lot_data)
+    add_prediction_to_lots(lot_data)
+    flat_predictions = flatten_predictions(lot_data)
+    save_flattened_availabilities_to_json(flat_predictions)
