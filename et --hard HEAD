@@ -1,0 +1,53 @@
+[33mcommit 16b93e926473c403c02a0b2d527fb13408d5889b[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: ronikr <roooonik@gmail.com>
+Date:   Thu May 15 13:02:02 2025 +0300
+
+    Added static data collection to mongo
+
+[33mcommit 8cd7918362a217220eb8f1ed002abb2e461085dc[m
+Author: ronikr <roooonik@gmail.com>
+Date:   Wed May 14 23:58:13 2025 +0300
+
+    Add Mongo upload script and predictions export
+
+[33mcommit e7c70c26ac25ec1ce8b3abf9dd2cff0380fcca35[m
+Author: ronikr <roooonik@gmail.com>
+Date:   Tue May 13 23:25:26 2025 +0300
+
+    Fix timestamp normalization to true UTC; integrate merged data for prediction
+
+[33mcommit b8198d694f69c12e28e0b1ded8450b3e212293c7[m
+Author: ronikr <roooonik@gmail.com>
+Date:   Tue May 13 17:17:01 2025 +0300
+
+    Merge imported data with Apify unique lots only (clean UTC timestamps)
+
+[33mcommit bb3d1894735aed6ec33561d125517fe8672a029f[m
+Author: ronikr <roooonik@gmail.com>
+Date:   Tue May 13 12:04:27 2025 +0300
+
+    Update file structure
+
+[33mcommit 21cc990a3b4f1eeae1a28a2337bb365068bd6323[m
+Author: ronikr <roooonik@gmail.com>
+Date:   Tue May 13 11:35:21 2025 +0300
+
+    Untrack data folder and ignore in future
+
+[33mcommit 5a1723b099e8ca8e93e3410e51d213dfb9110847[m
+Author: ronikr <roooonik@gmail.com>
+Date:   Tue May 13 10:58:16 2025 +0300
+
+    Stable baseline: renamed geva to imported, cleaned data conversion working
+
+[33mcommit 16f1df9a301a2f93975fe15b386f367510f13d7b[m
+Author: ronikr <roooonik@gmail.com>
+Date:   Thu May 8 22:01:13 2025 +0300
+
+    Apply .gitignore and clean up tracked files
+
+[33mcommit 83f14bc47977721d4858c617afaf09561873ddd4[m
+Author: ronikr <roooonik@gmail.com>
+Date:   Thu May 8 22:00:23 2025 +0300
+
+    First commit: initial project setup and code

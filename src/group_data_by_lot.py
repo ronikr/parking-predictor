@@ -66,7 +66,7 @@ def map_icon_to_status(icon: str) -> str:
     return mapping.get(icon, 'no_data')
 
 
-def load_dynamic_data(lot_dict: dict) -> None:
+def load_dynamic_data(lot_dict: dict) -> dict:
     with open(PARKING_DATA_FILE, encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
 
@@ -83,6 +83,7 @@ def load_dynamic_data(lot_dict: dict) -> None:
 
             israel_time = convert_utc_to_israel_time(timestamp)
             insert_availability(lot_dict, lot_id, israel_time, availability_status)
+    return lot_dict
 
 
 def calculate_availability_prediction(availability_list: list) -> dict:
@@ -111,13 +112,14 @@ def calculate_availability_prediction(availability_list: list) -> dict:
     return availability_options
 
 
-def add_prediction_to_lots(lot_dict: dict) -> None:
+def add_prediction_to_lots(lot_dict: dict) -> dict:
     for lot in lot_dict.values():
         for day in lot['availability'].values():
             for hour in day.values():
                 raw_hourly_data = hour['raw']
                 lot_prediction = calculate_availability_prediction(raw_hourly_data)
                 hour['prediction'] = lot_prediction
+    return lot_dict
 
 
 def flatten_predictions(lot_dict: dict) -> list[dict]:

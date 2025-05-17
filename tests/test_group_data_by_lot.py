@@ -68,7 +68,6 @@ def test_add_prediction_to_lots():
     lots = load_static_data()
     lots = load_dynamic_data(lots)
     lots = add_prediction_to_lots(lots)
-
     # decide how many we wish to test
     lot_limit = 1
     day_limit = 3
