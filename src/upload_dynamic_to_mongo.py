@@ -6,12 +6,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def upload_to_mongo(flattened_data, mongo_uri, db_name="parking_app", collection_name="hourly_predictions"):
+def upload_to_mongo(flattened_data, mongo_uri, db_name="parking_app", collection_name="hourly_predictions", wipe=False):
     client = MongoClient(mongo_uri)
     db = client[db_name]
     collection = db[collection_name]
 
-    # collection.delete_many({})  # 💣 Wipe existing data
+    if wipe:
+        collection.delete_many({})  # 💣 Wipe existing data
+        print(f"🗑 Cleared collection {collection_name}")
 
     if flattened_data:
         collection.insert_many(flattened_data)
@@ -22,16 +24,24 @@ def upload_to_mongo(flattened_data, mongo_uri, db_name="parking_app", collection
 
 # Example usage
 if __name__ == "__main__":
-    file_path = "../data/output/hourly_predictions.json"
+    file_regular = "../data/output/hourly_predictions.json"
+    file_holiday = "../data/output/hourly_predictions_holiday.json"
 
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"❌ File not found: {file_path}")
+    if not os.path.exists(file_regular):
+        raise FileNotFoundError(f"❌ File not found: {file_regular}")
+    if not os.path.exists(file_holiday):
+        raise FileNotFoundError(f"❌ File not found: {file_holiday}")
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    with open(file_regular, "r", encoding="utf-8") as f:
+        regular_data = json.load(f)
+
+    with open(file_holiday, "r", encoding="utf-8") as f:
+        holiday_data = json.load(f)
 
     mongo_uri = os.getenv("MONGO_URI")
     if not mongo_uri:
         raise ValueError("MONGO_URI is not set in environment variables.")
 
-    upload_to_mongo(data, mongo_uri)
+    # upload_to_mongo(regular_data, mongo_uri, wipe=False)
+    upload_to_mongo(holiday_data, mongo_uri, wipe=False)
+
