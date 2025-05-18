@@ -6,6 +6,7 @@ import json
 import os
 
 PARKING_DATA_FILE = "../data/merged_parking_data.csv"
+PARKING_DATA_FILE_HOLIDAY = "../data/holiday_observations.csv"
 STATIC_LOT_DATA = "../data/apify/dataset_parking-address-data.csv"
 
 
@@ -24,7 +25,9 @@ def load_static_data() -> dict:
                 'url': row['url'],
                 'location': {
                     'type': 'Point',
-                    'coordinates': [0.0, 0.0]  # Placeholder
+                    'coordinates': [
+                        float(row['lon']),
+                        float(row['lat'])]
                 },
                 'availability': {}
             }
