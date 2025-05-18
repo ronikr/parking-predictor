@@ -40,22 +40,27 @@ def convert_utc_to_israel_time(utc_timestamp: str) -> datetime:
     return dt_il
 
 
-def insert_availability(lots_by_id: dict, lot_id: str, israel_time: datetime, availability_status: str) -> None:
-    weekday = israel_time.strftime('%A').lower()
+def insert_availability(
+        lots_by_id: dict,
+        lot_id: str,
+        israel_time: datetime,
+        availability_status: str,
+        label: str
+) -> None:
     hour = israel_time.hour
     lot_data = lots_by_id[lot_id]
     availability = lot_data['availability']
 
-    if weekday not in availability:
-        availability[weekday] = {}
+    if label not in availability:
+        availability[label] = {}
 
-    if hour not in availability[weekday]:
-        availability[weekday][hour] = {
+    if hour not in availability[label]:
+        availability[label][hour] = {
             'raw': [],
             'prediction': None
         }
 
-    availability[weekday][hour]['raw'].append(availability_status)
+    availability[label][hour]['raw'].append(availability_status)
 
 
 def map_icon_to_status(icon: str) -> str:
@@ -69,8 +74,12 @@ def map_icon_to_status(icon: str) -> str:
     return mapping.get(icon, 'no_data')
 
 
-def load_dynamic_data(lot_dict: dict) -> dict:
-    with open(PARKING_DATA_FILE, encoding='utf-8-sig') as file:
+def load_dynamic_data(
+        lot_dict: dict,
+        data_file_path: str = PARKING_DATA_FILE,
+        use_holidays: bool = False
+) -> dict:
+    with open(data_file_path, encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
 
         for row in reader:
@@ -85,7 +94,15 @@ def load_dynamic_data(lot_dict: dict) -> dict:
                 continue
 
             israel_time = convert_utc_to_israel_time(timestamp)
-            insert_availability(lot_dict, lot_id, israel_time, availability_status)
+
+            if use_holidays:
+                label = row.get('holiday_name_he')
+                if not label:
+                    continue  # skip non-holiday rows just in case
+            else:
+                label = israel_time.strftime('%A').lower()
+
+            insert_availability(lot_dict, lot_id, israel_time, availability_status, label)
     return lot_dict
 
 
@@ -175,12 +192,30 @@ def save_flattened_static_to_json(static_data: list[dict], output_path="../data/
         json.dump(static_data, f, indent=2, ensure_ascii=False)
 
 
-if __name__ == "__main__":
+def process_and_save(data_file_path: str, output_file: str, use_holidays: bool = False):
     lot_data = load_static_data()
-    flat_static = flatten_static_metadata(lot_data)
-    save_flattened_static_to_json(flat_static)
-
-    load_dynamic_data(lot_data)
+    load_dynamic_data(lot_data, data_file_path=data_file_path, use_holidays=use_holidays)
     add_prediction_to_lots(lot_data)
     flat_predictions = flatten_predictions(lot_data)
-    save_flattened_availabilities_to_json(flat_predictions)
+    save_flattened_availabilities_to_json(flat_predictions, output_path=output_file)
+
+
+if __name__ == "__main__":
+    # Static metadata
+    static_data = load_static_data()
+    save_flattened_static_to_json(flatten_static_metadata(static_data))
+
+    # Regular data
+    process_and_save(
+        data_file_path=PARKING_DATA_FILE,
+        output_file="../data/output/hourly_predictions.json"
+    )
+
+    # Holiday data
+    process_and_save(
+        data_file_path=PARKING_DATA_FILE_HOLIDAY,
+        output_file="../data/output/hourly_predictions_holiday.json",
+        use_holidays=True
+    )
+
+

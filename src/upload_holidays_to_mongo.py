@@ -5,12 +5,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def upload_to_mongo(flattened_data, mongo_uri, db_name="parking_app", collection_name="lots_static"):
+def upload_to_mongo(flattened_data, mongo_uri, db_name="parking_app", collection_name="hourly_predictions_holiday"):
     client = MongoClient(mongo_uri)
     db = client[db_name]
     collection = db[collection_name]
-
-    collection.delete_many({})  # 💣 Wipe existing data
 
     if flattened_data:
         collection.insert_many(flattened_data)
@@ -19,8 +17,9 @@ def upload_to_mongo(flattened_data, mongo_uri, db_name="parking_app", collection
         print("⚠️ No data to insert.")
 
 
+# Example usage
 if __name__ == "__main__":
-    file_path = "../data/output/lots_static.json"
+    file_path = "../data/output/hourly_predictions_holiday.json"
 
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"❌ File not found: {file_path}")

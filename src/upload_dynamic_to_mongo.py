@@ -5,16 +5,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def upload_to_mongo(flattened_data, mongo_uri, db_name="parking_app", collection_name="hourly_predictions"):
     client = MongoClient(mongo_uri)
     db = client[db_name]
     collection = db[collection_name]
+
+    # collection.delete_many({})  # 💣 Wipe existing data
 
     if flattened_data:
         collection.insert_many(flattened_data)
         print(f"✅ Inserted {len(flattened_data)} records into {db_name}.{collection_name}")
     else:
         print("⚠️ No data to insert.")
+
 
 # Example usage
 if __name__ == "__main__":
