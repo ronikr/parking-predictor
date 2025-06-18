@@ -2,11 +2,20 @@ from fastapi import FastAPI, HTTPException, Query
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+from fastapi.middleware.cors import CORSMiddleware
+
 
 load_dotenv()
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # or ["http://127.0.0.1:5500"] during dev
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 mongo_uri = os.getenv("MONGO_URI")
 if not mongo_uri:
     raise ValueError("MONGO_URI is not set in environment variables.")
