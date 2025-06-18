@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# IMPORTANT! use this only if i need seperate holiday file - at the moment holiday queries go to the same large db
+
 def upload_to_mongo(flattened_data, mongo_uri, db_name="parking_app", collection_name="hourly_predictions_holiday"):
     client = MongoClient(mongo_uri)
     db = client[db_name]

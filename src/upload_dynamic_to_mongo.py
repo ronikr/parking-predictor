@@ -42,6 +42,10 @@ if __name__ == "__main__":
     if not mongo_uri:
         raise ValueError("MONGO_URI is not set in environment variables.")
 
-    # upload_to_mongo(regular_data, mongo_uri, wipe=False)
+    print("🧼 Wiping and uploading regular data...")
+    upload_to_mongo(regular_data, mongo_uri, wipe=True)
+
+    print("➕ Adding holiday data on top...")
     upload_to_mongo(holiday_data, mongo_uri, wipe=False)
+
 

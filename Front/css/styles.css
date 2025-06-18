@@ -1,0 +1,24 @@
+.toggle-checkbox {
+  appearance: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: #fff;
+  border-radius: 9999px;
+  border: 2px solid #ccc;
+  transition: transform 0.3s ease;
+  position: relative;
+}
+
+.toggle-checkbox:checked {
+  transform: translateX(1.25rem);
+  border-color: #3b82f6; /* blue-500 */
+}
+
+.toggle-label {
+  display: block;
+  background-color: #d1d5db; /* gray-300 */
+  border-radius: 9999px;
+  height: 1.5rem;
+  width: 2.5rem;
+  cursor: pointer;
+}
