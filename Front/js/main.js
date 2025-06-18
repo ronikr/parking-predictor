@@ -1,5 +1,14 @@
 
 const weekdays = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
+const weekdayMap = {
+  "ראשון": "sunday",
+  "שני": "monday",
+  "שלישי": "tuesday",
+  "רביעי": "wednesday",
+  "חמישי": "thursday",
+  "שישי": "friday",
+  "שבת": "saturday"
+};
 const holidays = [
   "ערב פסח",
   "פסח א׳",
@@ -13,6 +22,14 @@ const holidays = [
   "ערב שבועות",
   "שבועות"
 ];
+const statusLabels = {
+  available: "פנוי",
+  full: "מלא",
+  limited: "מעט",
+  unknown: "לא ידוע",
+  no_data: "אין נתונים"
+};
+
 
 
 const daySelect = document.getElementById("daySelect");
@@ -32,27 +49,43 @@ window.onload = () => {
 };
 
 async function fetchLots() {
-  const res = await fetch("https://parking-predictor.onrender.com/lots");
-  const lots = await res.json();
-  lotSelect.innerHTML = lots.map(lot =>
-    `<option value="${lot.lot_id}">${lot.name}</option>`).join("");
+  try {
+    const res = await fetch("https://parking-predictor.onrender.com/lots");
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    const lots = await res.json();
+    lotSelect.innerHTML = lots.map(lot =>
+      `<option value="${lot.lot_id}">${lot.name}</option>`).join("");
+  } catch (error) {
+    console.error('Error fetching lots:', error);
+    lotSelect.innerHTML = '<option>Error loading lots</option>';
+  }
 }
 
 async function fetchAvailability() {
-  const weekday = daySelect.value;
+  const useHolidays = holidayToggle.checked;
+  const selectedHebrewDay = daySelect.value;
+  const weekday = useHolidays ? selectedHebrewDay : weekdayMap[selectedHebrewDay];
   const hour = document.getElementById("hourSelect").value;
   const lotId = lotSelect.value;
-
+  const lotName = lotSelect.options[lotSelect.selectedIndex].text;
+  
   const url = `https://parking-predictor.onrender.com/prediction?lot_id=${lotId}&weekday=${encodeURIComponent(weekday)}&hour=${hour}`;
   const res = await fetch(url);
   const data = await res.json();
+  console.log(data);
 
   const resultsEl = document.getElementById("results");
   resultsEl.innerHTML = `
     <div class="border-b py-2">
-      <strong>${data.name || ""}</strong> (${data.lot_id})<br>
-      שעה ${data.hour}:00 ביום ${data.weekday}<br>
-      מצב חזוי: ${Object.entries(data.prediction || {}).map(([status, prob]) => `${status}: ${Math.round(prob * 100)}%`).join(" | ")}
+      
+      חניון ${lotName}, שעה ${data.hour}:00, ביום ${selectedHebrewDay}<br>
+      תחזית תפוסה: <br>
+       ${Object.entries(data.prediction || {}).map(([status, prob]) => `${statusLabels[status] || status}: ${Math.round(prob * 100)}%`).join(" <br> ")}
+      <br>
+      מחירים ותפוסת זמן אמת בחניון 
+      <a href="${data.url}" target="_blank" class="text-blue-600 hover:underline hover:text-blue-800 transition" >כאן</a>
     </div>
   `;
 }
