@@ -1,0 +1,13 @@
+name: Keep Render Warm
+
+on:
+  schedule:
+    - cron: '*/14 * * * *'  # every 14 minutes (UTC)
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render backend
+        run: curl -s https://parking-predictor.onrender.com/lots
