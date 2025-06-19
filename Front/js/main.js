@@ -1,14 +1,6 @@
 
 const weekdays = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-const weekdayMap = {
-  "ראשון": "sunday",
-  "שני": "monday",
-  "שלישי": "tuesday",
-  "רביעי": "wednesday",
-  "חמישי": "thursday",
-  "שישי": "friday",
-  "שבת": "saturday"
-};
+
 const holidays = [
   "ערב פסח",
   "פסח א׳",
@@ -35,6 +27,7 @@ const API_BASE = "https://parking-predictor.onrender.com";
 const daySelect = document.getElementById("daySelect");
 const holidayToggle = document.getElementById("holidayToggle");
 const lotSelect = document.getElementById("lotSelect");
+const hourSelect = document.getElementById("hourSelect");
 
 function populateDays() {
   const useHolidays = holidayToggle.checked;
@@ -64,45 +57,48 @@ async function fetchLots() {
 }
 
 async function fetchAvailability() {
-  const useHolidays = holidayToggle.checked;
-  const selectedHebrewDay = daySelect.value;
-  const weekday = useHolidays ? selectedHebrewDay : weekdayMap[selectedHebrewDay];
-  const hour = document.getElementById("hourSelect").value;
-  const lotId = lotSelect.value;
-  const lotName = lotSelect.options[lotSelect.selectedIndex].text;
+  try {
+    const weekday = daySelect.value;
+    const hour = hourSelect.value;
+    const lotId = lotSelect.value;
+    const lotName = lotSelect.options[lotSelect.selectedIndex].text;
 
-  const url = `${API_BASE}/prediction?lot_id=${lotId}&weekday=${encodeURIComponent(weekday)}&hour=${hour}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  console.log(data);
+    const url = `${API_BASE}/prediction?lot_id=${lotId}&weekday=${encodeURIComponent(weekday)}&hour=${hour}`;
+    const res = await fetch(url);
+    const data = await res.json();
 
-  const resultsEl = document.getElementById("results");
-  resultsEl.innerHTML = `
+    const resultsEl = document.getElementById("results");
+    resultsEl.innerHTML = `
   <div class="border-b py-2">
-    <b>חניון ${lotName}, שעה ${data.hour}:00, ביום ${selectedHebrewDay} בדרך כלל - </b><br>
+    <b>חניון ${lotName}, שעה ${data.hour}:00, ביום ${weekday} בדרך כלל - </b><br>
     ${(() => {
-      const prediction = data.prediction || {};
-      let totalUnknown = 0;
-      const readableStatuses = [];
+        const prediction = data.prediction || {};
+        let totalUnknown = 0;
+        const readableStatuses = [];
 
-      for (const [status, prob] of Object.entries(prediction)) {
-        if (status === "unknown" || status === "no_data") {
-          totalUnknown += prob;
-        } else if (prob > 0) {
-          readableStatuses.push(`${statusLabels[status] || status}: ${Math.round(prob * 100)}%`);
+        for (const [status, prob] of Object.entries(prediction)) {
+          if (status === "unknown" || status === "no_data") {
+            totalUnknown += prob;
+          } else if (prob > 0) {
+            readableStatuses.push(`${statusLabels[status] || status}: ${Math.round(prob * 100)}%`);
+          }
         }
-      }
 
-      if (totalUnknown > 0) {
-        readableStatuses.push(`אין מידע: ${Math.round(totalUnknown * 100)}%`);
-      }
+        if (totalUnknown > 0) {
+          readableStatuses.push(`אין מידע: ${Math.round(totalUnknown * 100)}%`);
+        }
 
-      return readableStatuses.join(" <br> ");
-    })()}
+        return readableStatuses.join(" <br> ");
+      })()}
     <br>
     מחירים ותפוסת זמן אמת בחניון 
     <a href="${data.url}" target="_blank" class="text-blue-600 hover:underline hover:text-blue-800 transition">כאן</a>
   </div>
 `;
+  } catch (error) {
+    console.error("Error fetching availability:", error);
+    document.getElementById("results").innerHTML = "שגיאה בטעינת התחזית.";
+  }
+
 
 }

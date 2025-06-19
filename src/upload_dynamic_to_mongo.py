@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     print("🧼 Wiping and uploading regular data...")
     upload_to_mongo(regular_data, mongo_uri, wipe=True)
-
+# both weekdays and holiday are added to the same db, don't use wipe in the second!
     print("➕ Adding holiday data on top...")
     upload_to_mongo(holiday_data, mongo_uri, wipe=False)
 

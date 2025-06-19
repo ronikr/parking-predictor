@@ -79,6 +79,15 @@ def load_dynamic_data(
         data_file_path: str = PARKING_DATA_FILE,
         use_holidays: bool = False
 ) -> dict:
+    weekday_he = {
+        "Sunday": "ראשון",
+        "Monday": "שני",
+        "Tuesday": "שלישי",
+        "Wednesday": "רביעי",
+        "Thursday": "חמישי",
+        "Friday": "שישי",
+        "Saturday": "שבת"
+    }
     with open(data_file_path, encoding='utf-8-sig') as file:
         reader = csv.DictReader(file)
 
@@ -100,7 +109,7 @@ def load_dynamic_data(
                 if not label:
                     continue  # skip non-holiday rows just in case
             else:
-                label = israel_time.strftime('%A').lower()
+                label = weekday_he[israel_time.strftime('%A')]
 
             insert_availability(lot_dict, lot_id, israel_time, availability_status, label)
     return lot_dict
