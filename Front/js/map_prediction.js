@@ -15,11 +15,11 @@ const statusColors = {
 };
 
 const statusLabels = {
-  available: "פנוי",
-  limited: "מעט",
-  full: "מלא",
-  unknown: "לא ידוע",
-  no_data: "אין נתונים"
+    available: "פנוי",
+    limited: "מעט",
+    full: "מלא",
+    unknown: "לא ידוע",
+    no_data: "אין נתונים"
 };
 
 const daySelect = document.getElementById("daySelect");
@@ -41,6 +41,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 let markersLayer = L.layerGroup().addTo(map);
 
 async function loadMapData() {
+    console.log('in the func')
     const weekday = daySelect.value;
     const hour = hourSelect.value;
     const url = `${API_BASE}/availability?weekday=${encodeURIComponent(weekday)}&hour=${hour}`;
@@ -49,14 +50,12 @@ async function loadMapData() {
         const res = await fetch(url);
         if (!res.ok) throw new Error("API error");
         const data = await res.json();
-        console.log(data)
 
         markersLayer.clearLayers();
 
         data.forEach(lot => {
             const lat = lot.location.coordinates[1];
             const lng = lot.location.coordinates[0];
-            console.log(lng)
             if (!lat || !lng) return;
 
             const color = statusColors[lot.status] || "gray";
@@ -69,8 +68,9 @@ async function loadMapData() {
                 opacity: 1,
                 fillOpacity: 0.8
             }).addTo(markersLayer);
+            const lotLink = `<a href="https://www.ahuzot.co.il/Parking/ParkingDetails/?ID=${lot.lot_id}" target="_blank" class="underline text-blue-600 hover:text-blue-800">${lot.name}</a>`;
 
-            circle.bindPopup(`<b>${lot.name}</b><br>${lot.lot_id}<br>תחזית: ${hebrewStatus}`);
+            circle.bindPopup(`${lotLink}<br>${lot.lot_id}<br>תחזית: ${hebrewStatus}`);
         });
     } catch (err) {
         alert("אירעה שגיאה בעת טעינת הנתונים.");
