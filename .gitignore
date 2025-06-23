@@ -16,6 +16,8 @@ Thumbs.db
 
 # Data files
 *.csv
+*.docx
+~$*
 
 # Secrets
 *.env

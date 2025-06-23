@@ -1,9 +1,15 @@
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from pydantic import BaseModel
+from datetime import datetime
 import os
-from fastapi.middleware.cors import CORSMiddleware
+import logging
 
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -11,11 +17,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or ["http://127.0.0.1:5500"] during dev
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 mongo_uri = os.getenv("MONGO_URI")
 if not mongo_uri:
     raise ValueError("MONGO_URI is not set in environment variables.")
@@ -24,8 +31,17 @@ client = MongoClient(mongo_uri)
 db = client["parking_app"]
 hourly_predictions = db["hourly_predictions"]
 lots_static = db["lots_static"]
+realtime_lots = db["realtime_lots"]  # NEW: Realtime collection
 
 
+# NEW: Pydantic model for incoming realtime data
+class LotUpdate(BaseModel):
+    id: str
+    name: str
+    status: str
+
+
+# YOUR EXISTING ENDPOINTS (unchanged)
 @app.get("/lots")
 def get_lots():
     lots = list(lots_static.find({}, {"_id": 0}))
@@ -35,7 +51,8 @@ def get_lots():
 @app.get("/prediction")
 def get_prediction(lot_id: str = Query(...), weekday: str = Query(...), hour: int = Query(...)):
     query = {"lot_id": lot_id, "weekday": weekday, "hour": hour}
-    result = hourly_predictions.find_one(query, {"_id": 0, "lot_id": 1, "weekday": 1, "hour": 1, "prediction": 1, "url": 1})
+    result = hourly_predictions.find_one(query,
+                                         {"_id": 0, "lot_id": 1, "weekday": 1, "hour": 1, "prediction": 1, "url": 1})
 
     if not result:
         raise HTTPException(status_code=404, detail="Prediction not found")
@@ -64,3 +81,56 @@ def get_availability(weekday: str = Query(...), hour: int = Query(...)):
         item["status"] = max_status
 
     return results
+
+
+# NEW REALTIME ENDPOINTS
+@app.post("/update-lot")
+def update_lot(lot_data: LotUpdate):
+    """Receive realtime parking data from Apify scraper"""
+    try:
+        # Store simple scraped data
+        lot_record = {
+            'id': lot_data.id,
+            'name': lot_data.name,
+            'status': lot_data.status
+        }
+
+        # Store in MongoDB (upsert - update if exists, insert if new)
+        result = realtime_lots.update_one(
+            {"id": lot_data.id},
+            {"$set": lot_record},
+            upsert=True
+        )
+
+        logger.info(f"📊 Updated lot {lot_data.id}: {lot_data.name} - {lot_data.status}")
+
+        return {'success': True}
+
+    except Exception as e:
+        logger.error(f"❌ Error updating lot data: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@app.get("/lots-realtime")
+def get_realtime_lots():
+    """Get current realtime parking data for frontend map"""
+    try:
+        lots_cursor = realtime_lots.find({})
+
+        lots_list = []
+        for lot in lots_cursor:
+            lot_data = {
+                'id': lot['id'],
+                'name': lot['name'],
+                'status': lot['status']
+            }
+            lots_list.append(lot_data)
+
+        return {
+            'timestamp': datetime.now().isoformat(),
+            'lots': lots_list
+        }
+
+    except Exception as e:
+        logger.error(f"❌ Error fetching realtime lots: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
