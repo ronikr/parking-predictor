@@ -33,18 +33,30 @@
       <h1 class="text-xl font-bold mb-4 text-center">
         תחזית חניונים פנויים לפי יום ושעה
       </h1>
-
+      <div class="flex items-center justify-center gap-4 mb-4">
+        <span class="text-sm">חג</span>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="holidayToggle" class="sr-only peer" />
+          <div
+            class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 transition-all duration-200"
+          ></div>
+          <div
+            class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200 peer-checked:translate-x-full"
+          ></div>
+        </label>
+        <span class="text-sm">יום רגיל</span>
+      </div>
       <div class="flex flex-wrap justify-center gap-4 mb-4">
         <div>
-          <label for="daySelect" class="block mb-1 text-sm">בחר יום</label>
+          <label for="daySelect" class="block mb-1 text-sm">בחרי יום</label>
           <select
             id="daySelect"
-            class="p-2 rounded border border-gray-300"
+            class="p-2 rounded border border-gray-300 min-w-[10rem] sm:min-w-[12rem] text-right"
           ></select>
         </div>
         <div>
-          <label for="hourSelect" class="block mb-1 text-sm">בחר שעה</label>
-          <select id="hourSelect" class="p-2 rounded border border-gray-300">
+          <label for="hourSelect" class="block mb-1 text-sm">בחרי שעה</label>
+          <select id="hourSelect" class="p-2 rounded border border-gray-300 min-w-[10rem] sm:min-w-[12rem] text-right">
             <script>
               for (let h = 0; h <= 23; h++) {
                 document.write(`<option value="${h}">${h}:00</option>`);
