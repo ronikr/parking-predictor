@@ -78,7 +78,7 @@ async function loadMapData() {
       const color = statusColors[lot.status] || "gray";
       const hebrewStatus = statusLabels[lot.status] || lot.status;
 
-      const lotLink = `<a href="https://ahuzot.co.il/ParkingDetails/?ID=${lot.lot_id}" target="_blank" class="underline text-blue-600 hover:text-blue-800">${lot.name}</a>`;
+      const lotLink = `<a href="https://ahuzot.co.il/Parking/ParkingDetails/?ID=${lot.lot_id}" target="_blank" class="underline text-blue-600 hover:text-blue-800">${lot.name}</a>`;
 
       const circle = L.circleMarker([lat, lng], {
         radius: 8,

@@ -39,6 +39,7 @@ class LotUpdate(BaseModel):
     id: str
     name: str
     status: str
+    timestamp: str
 
 
 # YOUR EXISTING ENDPOINTS (unchanged)
@@ -88,14 +89,16 @@ def get_availability(weekday: str = Query(...), hour: int = Query(...)):
 def update_lot(lot_data: LotUpdate):
     """Receive realtime parking data from Apify scraper"""
     try:
-        # Store simple scraped data
+        # Generate timestamp when API receives the data
+        scrape_time = datetime.now().isoformat()
+
         lot_record = {
             'id': lot_data.id,
             'name': lot_data.name,
-            'status': lot_data.status
+            'status': lot_data.status,
+            'scraped_at': scrape_time  # API timestamp, not Apify timestamp
         }
 
-        # Store in MongoDB (upsert - update if exists, insert if new)
         result = realtime_lots.update_one(
             {"id": lot_data.id},
             {"$set": lot_record},
@@ -103,7 +106,6 @@ def update_lot(lot_data: LotUpdate):
         )
 
         logger.info(f"📊 Updated lot {lot_data.id}: {lot_data.name} - {lot_data.status}")
-
         return {'success': True}
 
     except Exception as e:
@@ -116,8 +118,9 @@ def get_realtime_lots():
     """Get current realtime parking data for frontend map"""
     try:
         lots_cursor = realtime_lots.find({})
-
         lots_list = []
+        scrape_timestamp = None
+
         for lot in lots_cursor:
             lot_data = {
                 'id': lot['id'],
@@ -126,8 +129,12 @@ def get_realtime_lots():
             }
             lots_list.append(lot_data)
 
+            # Get timestamp from first lot
+            if scrape_timestamp is None and 'scraped_at' in lot:
+                scrape_timestamp = lot['scraped_at']
+
         return {
-            'timestamp': datetime.now().isoformat(),
+            'timestamp': scrape_timestamp or "",
             'lots': lots_list
         }
 
