@@ -48,7 +48,8 @@ async function loadRealtimeMap() {
         const scrapeTime = new Date(realtimeData.timestamp);
         const timeOnly = scrapeTime.toLocaleTimeString("he-IL", {
           hour: "2-digit",
-          minute: "2-digit"
+          minute: "2-digit",
+           timeZone: "Asia/Jerusalem"
         });
         updatedElem.textContent = `עודכן לאחרונה: ${timeOnly}`;
       } else {
