@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone
+import pytz
 import os
 import logging
 
@@ -90,7 +91,8 @@ def update_lot(lot_data: LotUpdate):
     """Receive realtime parking data from Apify scraper"""
     try:
         # Generate timestamp when API receives the data
-        scrape_time = datetime.now().isoformat()
+        israel_tz = pytz.timezone('Asia/Jerusalem')
+        scrape_time = datetime.now(israel_tz).isoformat()
 
         lot_record = {
             'id': lot_data.id,

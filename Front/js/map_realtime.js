@@ -8,7 +8,7 @@ let markersLayer = L.layerGroup().addTo(map);
 
 const statusLabels = {
   available: "פנוי",
-  limited: "מעט", 
+  limited: "מעט",
   full: "מלא",
   unknown: "לא ידוע",
   no_data: "אין נתונים"
@@ -42,15 +42,15 @@ async function loadRealtimeMap() {
     const staticData = await staticRes.json();
 
     // Update timestamp
-   const updatedElem = document.getElementById("lastUpdated");
+    const updatedElem = document.getElementById("lastUpdated");
     if (updatedElem) {
       if (realtimeData.timestamp) {
         const scrapeTime = new Date(realtimeData.timestamp);
-        const timeOnly = scrapeTime.toLocaleTimeString("he-IL", {
-          hour: "2-digit",
-          minute: "2-digit",
-           timeZone: "Asia/Jerusalem"
-        });
+        const timeOnly = new Intl.DateTimeFormat('he-IL', {
+          timeZone: 'Asia/Jerusalem',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).format(scrapeTime);
         updatedElem.textContent = `עודכן לאחרונה: ${timeOnly}`;
       } else {
         updatedElem.textContent = `עודכן לאחרונה: לא ידוע`;
@@ -66,12 +66,12 @@ async function loadRealtimeMap() {
     staticData.forEach(staticLot => {
       // Find matching realtime data
       const realtimeLot = realtimeData.lots.find(rt => rt.id === staticLot.lot_id);
-      
+
       if (realtimeLot) {
         // Get coordinates from static data
         const lat = staticLot.location?.coordinates?.[1];
         const lng = staticLot.location?.coordinates?.[0];
-        
+
         if (!lat || !lng) {
           console.warn(`No coordinates for lot ${staticLot.lot_id}`);
           return;
@@ -94,9 +94,9 @@ async function loadRealtimeMap() {
 
         // Create popup
         const lotLink = `<a href="https://ahuzot.co.il/Parking/ParkingDetails/?ID=${realtimeLot.id}" target="_blank" class="underline text-blue-600 hover:text-blue-800">${realtimeLot.name}</a>`;
-        
+
         circle.bindPopup(`${lotLink}<br> ${realtimeLot.id}<br>סטטוס: ${hebrewStatus}`);
-        
+
         addedMarkers++;
       } else {
         console.warn(`No realtime data for lot ${staticLot.lot_id}`);
@@ -104,7 +104,7 @@ async function loadRealtimeMap() {
     });
 
     console.log(`Added ${addedMarkers} markers to map`);
-    
+
     // Update counter if element exists
     const counterElem = document.getElementById("lotCount");
     if (counterElem) {
