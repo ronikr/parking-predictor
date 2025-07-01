@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -43,7 +43,6 @@ lots_static = db["lots_static"]
 realtime_lots = db["realtime_lots"]  # NEW: Realtime collection
 
 
-# NEW: Pydantic model for incoming realtime data
 class LotUpdate(BaseModel):
     id: str
     name: str
@@ -51,17 +50,16 @@ class LotUpdate(BaseModel):
     timestamp: str
 
 
-# YOUR EXISTING ENDPOINTS (unchanged)
 @app.get("/lots")
 @limiter.limit("60/minute")  # Used by both maps
-def get_lots():
+def get_lots(request: Request):
     lots = list(lots_static.find({}, {"_id": 0}))
     return lots
 
 
 @app.get("/prediction")
 @limiter.limit("30/minute")  # Planning users - less frequent
-def get_prediction(lot_id: str = Query(...), weekday: str = Query(...), hour: int = Query(...)):
+def get_prediction(request: Request, lot_id: str = Query(...), weekday: str = Query(...), hour: int = Query(...)):
     query = {"lot_id": lot_id, "weekday": weekday, "hour": hour}
     result = hourly_predictions.find_one(query,
                                          {"_id": 0, "lot_id": 1, "weekday": 1, "hour": 1, "prediction": 1, "url": 1})
@@ -74,7 +72,7 @@ def get_prediction(lot_id: str = Query(...), weekday: str = Query(...), hour: in
 
 @app.get("/availability")
 @limiter.limit("30/minute")  # Planning users - less frequent
-def get_availability(weekday: str = Query(...), hour: int = Query(...)):
+def get_availability(request: Request, weekday: str = Query(...), hour: int = Query(...)):
     query = {"weekday": weekday, "hour": hour}
     projection = {"_id": 0, "lot_id": 1, "name": 1, "location": 1, "prediction": 1}
 
@@ -99,7 +97,7 @@ def get_availability(weekday: str = Query(...), hour: int = Query(...)):
 # NEW REALTIME ENDPOINTS
 @app.post("/update-lot")
 @limiter.limit("200/minute")  # Apify only
-def update_lot(lot_data: LotUpdate):
+def update_lot(request: Request, lot_data: LotUpdate):
     """Receive realtime parking data from Apify scraper"""
     try:
         # Generate timestamp when API receives the data
@@ -129,7 +127,7 @@ def update_lot(lot_data: LotUpdate):
 
 @app.get("/lots-realtime")
 @limiter.limit("60/minute")  # Realtime users
-def get_realtime_lots():
+def get_realtime_lots(request: Request):
     """Get current realtime parking data for frontend map"""
     try:
         lots_cursor = realtime_lots.find({})
