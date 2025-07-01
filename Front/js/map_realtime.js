@@ -73,7 +73,7 @@ async function loadRealtimeMap() {
         const lng = staticLot.location?.coordinates?.[0];
 
         if (!lat || !lng) {
-          console.warn(`No coordinates for lot ${staticLot.lot_id}`);
+          // console.warn(`No coordinates for lot ${staticLot.lot_id}`);
           return;
         }
 
@@ -99,7 +99,7 @@ async function loadRealtimeMap() {
 
         addedMarkers++;
       } else {
-        console.warn(`No realtime data for lot ${staticLot.lot_id}`);
+        // console.warn(`No realtime data for lot ${staticLot.lot_id}`);
       }
     });
 

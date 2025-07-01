@@ -4,6 +4,9 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from datetime import datetime, timezone
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import pytz
 import os
 import logging
@@ -15,6 +18,11 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = FastAPI()
+
+# Create limiter
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,12 +53,14 @@ class LotUpdate(BaseModel):
 
 # YOUR EXISTING ENDPOINTS (unchanged)
 @app.get("/lots")
+@limiter.limit("60/minute")  # Used by both maps
 def get_lots():
     lots = list(lots_static.find({}, {"_id": 0}))
     return lots
 
 
 @app.get("/prediction")
+@limiter.limit("30/minute")  # Planning users - less frequent
 def get_prediction(lot_id: str = Query(...), weekday: str = Query(...), hour: int = Query(...)):
     query = {"lot_id": lot_id, "weekday": weekday, "hour": hour}
     result = hourly_predictions.find_one(query,
@@ -63,6 +73,7 @@ def get_prediction(lot_id: str = Query(...), weekday: str = Query(...), hour: in
 
 
 @app.get("/availability")
+@limiter.limit("30/minute")  # Planning users - less frequent
 def get_availability(weekday: str = Query(...), hour: int = Query(...)):
     query = {"weekday": weekday, "hour": hour}
     projection = {"_id": 0, "lot_id": 1, "name": 1, "location": 1, "prediction": 1}
@@ -87,6 +98,7 @@ def get_availability(weekday: str = Query(...), hour: int = Query(...)):
 
 # NEW REALTIME ENDPOINTS
 @app.post("/update-lot")
+@limiter.limit("200/minute")  # Apify only
 def update_lot(lot_data: LotUpdate):
     """Receive realtime parking data from Apify scraper"""
     try:
@@ -116,6 +128,7 @@ def update_lot(lot_data: LotUpdate):
 
 
 @app.get("/lots-realtime")
+@limiter.limit("60/minute")  # Realtime users
 def get_realtime_lots():
     """Get current realtime parking data for frontend map"""
     try:
@@ -143,3 +156,4 @@ def get_realtime_lots():
     except Exception as e:
         logger.error(f"❌ Error fetching realtime lots: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
