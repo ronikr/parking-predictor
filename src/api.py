@@ -137,7 +137,7 @@ def get_realtime_lots(request: Request):
     try:
         lots_cursor = realtime_lots.find({})
         lots_list = []
-        scrape_timestamp = None
+        all_timestamps = []
 
         for lot in lots_cursor:
             lot_data = {
@@ -147,9 +147,12 @@ def get_realtime_lots(request: Request):
             }
             lots_list.append(lot_data)
 
-            # Get timestamp from first lot
-            if scrape_timestamp is None and 'scraped_at' in lot:
-                scrape_timestamp = lot['scraped_at']
+            # Collect all timestamps
+            if 'scraped_at' in lot:
+                all_timestamps.append(lot['scraped_at'])
+
+        # Get the LATEST timestamp instead of first
+        scrape_timestamp = max(all_timestamps) if all_timestamps else None
 
         return {
             'timestamp': scrape_timestamp or "",
@@ -159,4 +162,3 @@ def get_realtime_lots(request: Request):
     except Exception as e:
         logger.error(f"❌ Error fetching realtime lots: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
-
