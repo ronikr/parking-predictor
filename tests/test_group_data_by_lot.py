@@ -4,8 +4,7 @@ from src.group_data_by_lot import (load_static_data,
                                    load_dynamic_data,
                                    add_prediction_to_lots,
                                    convert_utc_to_israel_time,
-                                   calculate_availability_prediction,
-                                   filter_completely_dead_lots)
+                                   calculate_availability_prediction)
 
 
 def preview_csv(file_path, num_rows=3):
@@ -91,32 +90,6 @@ def test_add_prediction_to_lots():
             break
 
 
-def test_filtering():
-    """Test filtering function and show results"""
-    print("\n🧪 Testing dead lot filtering...")
-
-    # Load data
-    static_lots = load_static_data()
-    populated_lots = load_dynamic_data(static_lots)
-    lots_with_predictions = add_prediction_to_lots(populated_lots)
-
-    print(f"📊 Before filtering: {len(lots_with_predictions)} lots")
-
-    # Apply filtering
-    filtered_lots = filter_completely_dead_lots(lots_with_predictions)
-
-    # Show results
-    removed_count = len(lots_with_predictions) - len(filtered_lots)
-    print(f"📊 After filtering: {len(filtered_lots)} lots ({removed_count} removed)")
-
-    if removed_count > 0:
-        removed_lots = set(lots_with_predictions.keys()) - set(filtered_lots.keys())
-        print(f"🚫 Removed lot IDs: {sorted(removed_lots)}")
-
-
-
-
-
 def test_convert_utc_to_israel_time():
     print(convert_utc_to_israel_time("2025-01-17T07:00:00Z"))  # Winter (UTC+2)
     print(convert_utc_to_israel_time("2025-05-06T07:00:00Z"))  # Summer (UTC+3)
@@ -136,6 +109,5 @@ if __name__ == "__main__":
     static_lots = load_static_data()
     populated_lots = load_dynamic_data(static_lots)
     test_add_prediction_to_lots()
-    test_filtering()
     # preview_availability(populated_lots)
 

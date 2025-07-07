@@ -10,45 +10,6 @@ PARKING_DATA_FILE_HOLIDAY = "../data/holiday_observations.csv"
 STATIC_LOT_DATA = "../data/apify/dataset_parking-address-data.csv"
 
 
-def filter_completely_dead_lots(lot_dict: dict) -> dict:
-    """Filter out only lots with 100% bad data (unknown + no_data)"""
-    active_lots = {}
-    filtered_out = []
-
-    print("🔍 Filtering completely dead lots...")
-
-    for lot_id, lot_data in lot_dict.items():
-        total_predictions = 0
-        total_bad_data = 0
-
-        # Check all predictions for this lot
-        availability = lot_data.get('availability', {})
-        for day, hours in availability.items():
-            for hour, hour_data in hours.items():
-                prediction = hour_data.get('prediction', {})
-                if prediction:
-                    total_predictions += 1
-                    bad_data_rate = prediction.get('unknown', 0) + prediction.get('no_data', 0)
-                    total_bad_data += bad_data_rate
-
-        if total_predictions > 0:
-            avg_bad_data_rate = total_bad_data / total_predictions
-
-            if avg_bad_data_rate < 1.0:
-                active_lots[lot_id] = lot_data
-            else:
-                filtered_out.append(lot_id)
-        else:
-            filtered_out.append(lot_id)
-
-    # Just summary - no individual lot details
-    print(f"📊 Kept {len(active_lots)} lots, filtered {len(filtered_out)} dead lots")
-    if filtered_out:
-        print(f"🚫 Filtered lot IDs: {sorted(filtered_out)}")
-
-    return active_lots
-
-
 def load_static_data() -> dict:
     # organize static csv lot data into dict
     lots = {}
@@ -240,13 +201,10 @@ def save_flattened_static_to_json(static_data: list[dict], output_path="../data/
         json.dump(static_data, f, indent=2, ensure_ascii=False)
 
 
-def process_and_save(data_file_path: str, output_file: str, use_holidays: bool = False, filter_dead_lots: bool = True):
+def process_and_save(data_file_path: str, output_file: str, use_holidays: bool = False):
     lot_data = load_static_data()
     load_dynamic_data(lot_data, data_file_path=data_file_path, use_holidays=use_holidays)
     add_prediction_to_lots(lot_data)
-    # Filter only completely dead lots (100% no data)
-    if filter_dead_lots:
-        lot_data = filter_completely_dead_lots(lot_data)
     flat_predictions = flatten_predictions(lot_data)
     save_flattened_availabilities_to_json(flat_predictions, output_path=output_file)
 
