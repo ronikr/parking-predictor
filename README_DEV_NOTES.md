@@ -65,7 +65,4 @@ _Last updated: 2025-06-18_
 ---
 
 ## 💡 Future TODOs
-- fix CORS in API to not "allow_origins=["*"]" after all works - this is a security issue!
-- Optionally implement dynamic switch between `hourly_predictions` and `hourly_predictions_holiday`
-- Add frontend (can be AI-generated or from template)
 - Add `/health` endpoint to API for easier monitoring
