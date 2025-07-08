@@ -1,61 +1,73 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>תחזית תפוסה</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-4 md:p-6 font-sans">
-  <nav class="bg-white shadow mb-4 p-4 text-center space-x-4 rtl:space-x-reverse">
-  <a href="index.html" class="text-blue-600 hover:underline font-bold">תחזית לפי חניון</a>
-  <a href="map_prediction.html" class="text-blue-600 hover:underline">מפת תחזית</a>
-  <a href="map_realtime.html" class="text-blue-600 hover:underline">מפת זמן אמת</a>
-</nav>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>מפת זמן אמת חניונים - ParkInsight</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  </head>
+  <body class="min-h-screen">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="brand-logo">
+            <i class="fas fa-car-side"></i>
+            ParkInsight
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="status-indicator success live-indicator">
+              <i class="fas fa-satellite"></i>
+              זמן אמת
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
 
-  <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
-    <h1 class="text-2xl font-bold mb-4 text-center">תחזית תפוסה עתידית בחניוני אחוזת החוף</h1>
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Navigation Tabs -->
+      <div class="nav-tabs max-w-2xl mx-auto mb-8 fade-in">
+        <a href="prediction_by_lot.html" class="nav-tab">
+          <i class="fas fa-chart-line"></i>
+          תחזית לפי חניון
+        </a>
+        <a href="map_prediction.html" class="nav-tab">
+          <i class="fas fa-map-marked-alt"></i>
+          מפת תחזית
+        </a>
+        <a href="index.html" class="nav-tab active">
+          <i class="fas fa-satellite"></i>
+          מפת זמן אמת
+        </a>
+      </div>
 
-    <div class="flex items-center justify-center gap-4 mb-4">
-      <span class="text-sm">חג</span>
-      <label class="relative inline-flex items-center cursor-pointer">
-        <input type="checkbox" id="holidayToggle" class="sr-only peer">
-        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 transition-all duration-200"></div>
-        <div class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200 peer-checked:translate-x-full"></div>
-      </label>
-      <span class="text-sm">יום רגיל</span>
+      <!-- Page Header -->
+      <div class="text-center mb-8 fade-in">
+        <h1 class="page-title">זמינות חניונים בזמן אמת</h1>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-card fade-in">
+        <!-- Status Section -->
+        <div class="status-section">
+          <div id="lastUpdated" class="last-updated">
+            <i class="fas fa-clock"></i>
+            <span>עודכן לאחרונה: טוען...</span>
+          </div>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+          <div id="map" class="w-full h-full"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="mb-4">
-      <label for="daySelect" class="block mb-1">בחרי יום</label>
-      <select id="daySelect" class="w-full border border-gray-300 rounded p-2"></select>
-    </div>
-
-    <div class="mb-4">
-      <label for="hourSelect" class="block mb-1">בחרי שעה</label>
-      <select id="hourSelect" class="w-full border border-gray-300 rounded p-2">
-        <script>
-          for (let h = 0; h <= 23; h++) {
-            document.write(`<option value="${h}">${h}:00</option>`);
-          }
-        </script>
-      </select>
-    </div>
-
-    <div class="mb-4">
-      <label for="lotSelect" class="block mb-1">בחרי חניון</label>
-      <select id="lotSelect" class="w-full border border-gray-300 rounded p-2">
-        <option disabled selected>טוענת חניונים...</option>
-      </select>
-    </div>
-
-    <button onclick="fetchAvailability()" class="bg-blue-600 text-white w-full py-2 rounded hover:bg-blue-700">
-      הצג תחזית
-    </button>
-
-    <div id="results" class="mt-6 text-sm"></div>
-  </div>
-
-  <script src="js/main.js" defer></script>
-</body>
+    <script src="js/map_realtime.js" defer></script>
+  </body>
 </html>

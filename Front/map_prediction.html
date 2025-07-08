@@ -3,84 +3,156 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>מפת תחזית חניונים</title>
-    <!-- Replace these two lines: -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <title>מפת תחזית חניונים - ParkInsight</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/styles.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+/* Fix holiday toggle on mobile for map prediction page */
+@media (max-width: 640px) {
+  .toggle-container {
+    padding: 1rem !important;
+    gap: 0.75rem !important;
+    justify-content: center !important;
+  }
+  
+  .toggle-label {
+    font-size: 0.8rem !important;
+    white-space: nowrap !important;
+  }
+  
+  .toggle-switch {
+    width: 48px !important;
+    height: 24px !important;
+  }
+  
+  .toggle-slider:before {
+    height: 16px !important;
+    width: 16px !important;
+    left: 4px !important;
+    bottom: 4px !important;
+  }
+  
+  input:checked + .toggle-slider:before {
+    transform: translateX(24px) !important;
+  }
+  
+  /* Also improve the control group layout on mobile */
+  .control-group {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+}
+</style>
   </head>
-  <body class="bg-gray-100 p-4 font-sans">
-    <nav
-      class="bg-white shadow mb-4 p-4 text-center space-x-4 rtl:space-x-reverse"
-    >
-      <a href="index.html" class="text-blue-600 hover:underline"
-        >תחזית לפי חניון</a
-      >
-      <a
-        href="map_prediction.html"
-        class="text-blue-600 hover:underline font-bold"
-        >מפת תחזית</a
-      >
-      <a href="map_realtime.html" class="text-blue-600 hover:underline"
-        >מפת זמן אמת</a
-      >
-    </nav>
+  <body class="min-h-screen">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="brand-logo">
+            <i class="fas fa-car-side"></i>
+            ParkInsight
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="status-indicator success">
+              <i class="fas fa-wifi"></i>
+              מחובר
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
 
-    <div class="max-w-4xl mx-auto">
-      <h1 class="text-xl font-bold mb-4 text-center">
-        תחזית חניונים פנויים לפי יום ושעה
-      </h1>
-      <div class="flex items-center justify-center gap-4 mb-4">
-        <span class="text-sm">חג</span>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" id="holidayToggle" class="sr-only peer" />
-          <div
-            class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:bg-blue-600 transition-all duration-200"
-          ></div>
-          <div
-            class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200 peer-checked:translate-x-full"
-          ></div>
-        </label>
-        <span class="text-sm">יום רגיל</span>
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Navigation Tabs -->
+      <div class="nav-tabs max-w-2xl mx-auto mb-8 fade-in">
+        <a href="prediction_by_lot.html" class="nav-tab">
+          <i class="fas fa-chart-line"></i>
+          תחזית לפי חניון
+        </a>
+        <a href="map_prediction.html" class="nav-tab active">
+          <i class="fas fa-map-marked-alt"></i>
+          מפת תחזית
+        </a>
+        <a href="index.html" class="nav-tab">
+          <i class="fas fa-satellite"></i>
+          מפת זמן אמת
+        </a>
       </div>
-      <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <div>
-          <label for="daySelect" class="block mb-1 text-sm">בחרי יום</label>
-          <select
-            id="daySelect"
-            class="p-2 rounded border border-gray-300 min-w-[10rem] sm:min-w-[12rem] text-right"
-          ></select>
+
+      <!-- Page Header -->
+      <div class="text-center mb-8 fade-in">
+        <h1 class="page-title">תחזית תפוסת חניונים</h1>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-card fade-in">
+        <!-- Controls Section -->
+        <div class="controls-section">
+          <!-- Holiday Toggle -->
+          <div class="toggle-container">
+            <span class="toggle-label">חג</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="holidayToggle" />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">יום רגיל</span>
+          </div>
+
+          <!-- Form Controls -->
+          <div class="control-group">
+            <div class="form-group">
+              <label for="daySelect" class="form-label">
+                <i class="fas fa-calendar-alt"></i>
+                בחרי יום
+              </label>
+              <select id="daySelect" class="form-control">
+                <option value="">בחרי יום מהרשימה...</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="hourSelect" class="form-label">
+                <i class="fas fa-clock"></i>
+                בחרי שעה
+              </label>
+              <select id="hourSelect" class="form-control">
+                <script>
+                  for (let h = 0; h <= 23; h++) {
+                    const hour = h.toString().padStart(2, '0');
+                    document.write(`<option value="${h}">${hour}:00</option>`);
+                  }
+                </script>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <button id="loadButton" onclick="loadMapData()" class="btn-primary">
+                <i class="fas fa-search"></i>
+                טען תחזית
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading Message -->
+          <div id="loadingMessage" class="loading-state hidden">
+            <div class="loading-spinner"></div>
+            <span>טוען נתונים...</span>
+            <i class="fas fa-car-side"></i>
+          </div>
         </div>
-        <div>
-          <label for="hourSelect" class="block mb-1 text-sm">בחרי שעה</label>
-          <select id="hourSelect" class="p-2 rounded border border-gray-300 min-w-[10rem] sm:min-w-[12rem] text-right">
-            <script>
-              for (let h = 0; h <= 23; h++) {
-                document.write(`<option value="${h}">${h}:00</option>`);
-              }
-            </script>
-          </select>
+
+        <!-- Map Container -->
+        <div class="map-container">
+          <div id="map" class="w-full h-full"></div>
         </div>
-        <button
-          id="loadButton"
-          onclick="loadMapData()"
-          class="bg-blue-600 text-white px-4 py-2 rounded self-end hover:bg-blue-700"
-        >
-          טען תחזית
-        </button>
       </div>
-      <div
-        id="loadingMessage"
-        class="text-center text-sm text-gray-500 hidden mb-2"
-      >
-        טוען נתונים...
-      </div>
-      <div id="map" class="w-full h-[600px] rounded shadow"></div>
     </div>
 
     <script src="js/map_prediction.js" defer></script>
+    
   </body>
 </html>

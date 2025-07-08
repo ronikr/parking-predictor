@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>תחזית לפי חניון - ParkInsight</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+/* Target only this page's specific elements */
+.main-card {
+  max-width: 600px !important;
+  margin: 0 auto !important;
+}
+
+/* Ensure proper page containers */
+body .max-w-7xl {
+  max-width: 80rem !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+body .max-w-2xl {
+  max-width: 42rem !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+</style>
+  </head>
+  <body class="min-h-screen">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="brand-logo">
+            <i class="fas fa-car-side"></i>
+            ParkInsight
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="status-indicator success">
+              <i class="fas fa-wifi"></i>
+              מחובר
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Navigation Tabs -->
+      <div class="nav-tabs max-w-2xl mx-auto mb-8 fade-in">
+        <a href="prediction_by_lot.html" class="nav-tab active">
+          <i class="fas fa-chart-line"></i>
+          תחזית לפי חניון
+        </a>
+        <a href="map_prediction.html" class="nav-tab">
+          <i class="fas fa-map-marked-alt"></i>
+          מפת תחזית
+        </a>
+        <a href="index.html" class="nav-tab">
+          <i class="fas fa-satellite"></i>
+          מפת זמן אמת
+        </a>
+      </div>
+
+      <!-- Page Header -->
+      <div class="text-center mb-8 fade-in">
+        <h1 class="page-title">תחזית תפוסה עתידית בחניוני אחוזת החוף</h1>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-card fade-in">
+        <!-- Form Section -->
+        <div class="form-section">
+          <!-- Holiday Toggle -->
+          <div class="toggle-container">
+            <span class="toggle-label">חג</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="holidayToggle" />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">יום רגיל</span>
+          </div>
+
+          <!-- Form Controls -->
+          <div class="form-group">
+            <label for="daySelect" class="form-label">
+              <i class="fas fa-calendar-alt"></i>
+              בחרי יום
+            </label>
+            <select id="daySelect" class="form-control"></select>
+          </div>
+
+          <div class="form-group">
+            <label for="hourSelect" class="form-label">
+              <i class="fas fa-clock"></i>
+              בחרי שעה
+            </label>
+            <select id="hourSelect" class="form-control">
+              <script>
+                for (let h = 0; h <= 23; h++) {
+                  document.write(`<option value="${h}">${h}:00</option>`);
+                }
+              </script>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="lotSelect" class="form-label">
+              <i class="fas fa-parking"></i>
+              בחרי חניון
+            </label>
+            <select id="lotSelect" class="form-control">
+              <option disabled selected>טוענת חניונים...</option>
+            </select>
+          </div>
+
+          <button onclick="fetchAvailability()" class="btn-primary">
+            <i class="fas fa-search"></i>
+            הצג תחזית
+          </button>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="results-section hidden">
+          <div class="result-card">
+            <div id="resultTitle" class="text-xl font-bold text-gray-800 mb-4 text-center">
+              חניון זבוג, יום ראשון בדרך כלל, שעה 11:00
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 mb-4">
+              <div class="text-center">
+                <div id="freePercent" class="text-2xl font-bold text-green-600">31%</div>
+                <div class="text-sm text-gray-600">פנוי</div>
+              </div>
+              <div class="text-center">
+                <div id="fullPercent" class="text-2xl font-bold text-red-600">50%</div>
+                <div class="text-sm text-gray-600">מלא</div>
+              </div>
+              <div class="text-center">
+                <div id="lowPercent" class="text-2xl font-bold text-yellow-600">19%</div>
+                <div class="text-sm text-gray-600">מעט</div>
+              </div>
+            </div>
+            
+            <div class="text-center">
+              <a href="#" class="text-blue-600 hover:underline text-sm">
+                מחירים ותפוסת זמן אמת בחניון כאן
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/prediction_by_lot.js" defer></script>
+ 
+  </body>
+</html>

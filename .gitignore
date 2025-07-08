@@ -14,6 +14,9 @@ Thumbs.db
 # IDE settings (optional but common)
 .idea/
 
+# Temp and test files
+*.old
+
 # Data files
 *.csv
 *.docx
