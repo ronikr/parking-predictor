@@ -92,6 +92,14 @@ async function loadMapData() {
       circle.bindPopup(`${lotLink}<br>${lot.lot_id}<br>תחזית: ${hebrewStatus}`);
     });
 
+       // AUTO-SCROLL: Scroll to map after data loads
+    setTimeout(() => {
+      document.getElementById('map').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 300);
+
   } catch (err) {
     alert("אירעה שגיאה בעת טעינת הנתונים.");
     console.error(err);

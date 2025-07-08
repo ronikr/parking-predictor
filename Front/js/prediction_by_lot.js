@@ -42,9 +42,16 @@ async function fetchAvailability() {
   const freePercent = document.getElementById('freePercent');
   const fullPercent = document.getElementById('fullPercent');
   const lowPercent = document.getElementById('lowPercent');
+
+   // Get the button for loading states
+  // const submitButton = document.querySelector('.btn-primary');
+  // const originalButtonContent = submitButton.innerHTML;
   
   try {
-    // Show loading state
+     // Show loading state on button
+    // submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> טוען תחזית...';
+    // submitButton.disabled = true;
+    // Show loading state in results
     resultTitle.textContent = 'טוען תחזית...';
     freePercent.textContent = '...';
     fullPercent.textContent = '...';
@@ -78,6 +85,25 @@ async function fetchAvailability() {
     if (linkElement && data.url) {
       linkElement.href = data.url;
     }
+
+    // // SUCCESS FEEDBACK: Show success state on button
+    // submitButton.innerHTML = '<i class="fas fa-check"></i> נטען בהצלחה!';
+    // submitButton.style.background = 'var(--success)';
+    
+    // AUTO-SCROLL: Scroll to results after short delay
+    setTimeout(() => {
+      resultsSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 500);
+    
+    // Reset button after 2 seconds
+    // setTimeout(() => {
+    //   submitButton.innerHTML = originalButtonContent;
+    //   submitButton.style.background = '';
+    //   submitButton.disabled = false;
+    // }, 2000);
     
   } catch (error) {
     console.error("Error fetching availability:", error);
