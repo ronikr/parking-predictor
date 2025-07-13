@@ -89,7 +89,7 @@ async function loadMapData() {
         fillOpacity: 0.8
       }).addTo(markersLayer);
 
-      circle.bindPopup(`${lotLink}<br>${lot.lot_id}<br>תחזית: ${hebrewStatus}`);
+      circle.bindPopup(`${lotLink}<br>תחזית: ${hebrewStatus}`);
     });
 
        // AUTO-SCROLL: Scroll to map after data loads

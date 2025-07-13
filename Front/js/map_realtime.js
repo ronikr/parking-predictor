@@ -95,7 +95,7 @@ async function loadRealtimeMap() {
         // Create popup
         const lotLink = `<a href="https://ahuzot.co.il/Parking/ParkingDetails/?ID=${realtimeLot.id}" target="_blank" class="underline text-blue-600 hover:text-blue-800">${realtimeLot.name}</a>`;
 
-        circle.bindPopup(`${lotLink}<br> ${realtimeLot.id}<br>סטטוס: ${hebrewStatus}`);
+        circle.bindPopup(`${lotLink}<br>סטטוס: ${hebrewStatus}`);
 
         addedMarkers++;
       } else {
